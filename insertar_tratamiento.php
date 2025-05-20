@@ -1,20 +1,31 @@
 <?php
 include 'conectar.php';
 
-$codigo = $_POST['codigo'];
-$nombreTratamiento = $_POST['nombre_tratamiento'];
-$fechaAplicacion = $_POST['fecha_aplicacion'];
-$laboratorio = $_POST['laboratorio'];
-$nombreExperto = $_POST['nombre_experto'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $codigo = $_POST['codigo'] ?? '';
+    $nombre = $_POST['nombre_tratamiento'] ?? '';
+    $fecha = $_POST['fecha_aplicacion'] ?? '';
+    $laboratorio = $_POST['laboratorio'] ?? '';
+    $experto = $_POST['nombre_experto'] ?? '';
 
-$sql = "INSERT INTO tratamientos (codigo, nombre_tratamiento, fecha_aplicacion, laboratorio, nombre_experto)
-VALUES ('$codigo', '$nombreTratamiento', '$fechaAplicacion', '$laboratorio', '$nombreExperto')";
+    $sql = "INSERT INTO tratamientos (codigo, nombre_tratamiento, fecha_aplicacion, laboratorio, nombre_experto)
+            VALUES (:codigo, :nombre, :fecha, :laboratorio, :experto)";
+    
+    $stmt = $pdo->prepare($sql);
 
-if (mysqli_query($con, $sql)) {
-    echo "Registro de tratamiento exitoso";
+    try {
+        $stmt->execute([
+            ':codigo' => $codigo,
+            ':nombre' => $nombre,
+            ':fecha' => $fecha,
+            ':laboratorio' => $laboratorio,
+            ':experto' => $experto
+        ]);
+        echo "Tratamiento registrado exitosamente";
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
 } else {
-    echo "Error: " . $sql . "<br>" . mysqli_error($con);
+    echo "Solicitud no válida.";
 }
-
-mysqli_close($con);
 ?>

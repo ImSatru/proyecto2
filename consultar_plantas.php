@@ -1,15 +1,28 @@
 <?php
 include 'conectar.php';
 
-$sql = "SELECT * FROM plantas";
-$result = mysqli_query($con, $sql);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $codigo = $_POST['codigo'] ?? null;
 
-$datos = array();
+    if ($codigo === null) {
+        echo json_encode(null);
+        exit;
+    }
 
-while ($fila = mysqli_fetch_assoc($result)) {
-    $datos[] = $fila;
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM plantas WHERE codigo = :codigo");
+        $stmt->execute(['codigo' => $codigo]);
+        $planta = $stmt->fetch();
+
+        if ($planta) {
+            echo json_encode($planta);
+        } else {
+            echo json_encode(null); // No encontrada
+        }
+    } catch (PDOException $e) {
+        echo json_encode(["error" => $e->getMessage()]);
+    }
+} else {
+    echo json_encode(["error" => "Método inválido"]);
 }
-
-echo json_encode($datos);
-mysqli_close($con);
 ?>

@@ -1,28 +1,46 @@
 <?php
 include 'conectar.php';
 
-$codigo = $_POST['codigo'];
-$nombre = $_POST['nombre'];
-$color = $_POST['color'];
-$zona = $_POST['zona'];
-$fertilizante = $_POST['fertilizante'];
-$altura = $_POST['altura'];
-$edad = $_POST['edad'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $codigo = $_POST['codigo'] ?? null;
+    $nombre = $_POST['nombre'] ?? null;
+    $color = $_POST['color'] ?? null;
+    $zona = $_POST['zona'] ?? null;
+    $fertilizante = $_POST['fertilizante'] ?? null;
+    $altura = $_POST['altura'] ?? null;
+    $edad = $_POST['edad'] ?? null;
 
-$sql = "UPDATE plantas SET 
-    nombre = '$nombre',
-    color = '$color',
-    zona = '$zona',
-    fertilizante = '$fertilizante',
-    altura = '$altura',
-    edad = '$edad'
-WHERE codigo = '$codigo'";
+    if ($codigo === null) {
+        echo "Código no recibido.";
+        exit;
+    }
 
-if (mysqli_query($con, $sql)) {
-    echo "Actualización de planta exitosa";
+    try {
+        $sql = "UPDATE plantas SET
+            nombre = :nombre,
+            color = :color,
+            zona = :zona,
+            fertilizante = :fertilizante,
+            altura = :altura,
+            edad = :edad
+        WHERE codigo = :codigo";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':nombre' => $nombre,
+            ':color' => $color,
+            ':zona' => $zona,
+            ':fertilizante' => $fertilizante,
+            ':altura' => $altura,
+            ':edad' => $edad,
+            ':codigo' => $codigo
+        ]);
+
+        echo "Planta actualizada correctamente";
+    } catch (PDOException $e) {
+        echo "Error en la actualización: " . $e->getMessage();
+    }
 } else {
-    echo "Error al actualizar: " . mysqli_error($con);
+    echo "Solicitud no válida.";
 }
-
-mysqli_close($con);
 ?>
